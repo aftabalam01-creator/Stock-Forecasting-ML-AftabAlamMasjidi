@@ -44,7 +44,7 @@ The current experiments focus on **Google (GOOG) stock data**, performing featur
 - Each model’s performance metrics (MSE and R²) are logged and exported as CSV for reproducibility.  
 
 *(Sample visualization below)*  
-![Workflow Diagram](A_flowchart_diagram_illustrates_stock_market_forec.png)
+![Workflow Diagram](Actual Vs Predicted.jpeg)
 
 ---
 
