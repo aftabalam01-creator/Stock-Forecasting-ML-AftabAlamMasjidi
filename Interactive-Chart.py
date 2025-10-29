@@ -7,36 +7,73 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import plotly.graph_objects as go
 
-df = pd.read_csv("google.csv")
-df['Date'] = pd.to_datetime(df['Date'])
+@st.cache_data
+def load_and_prep_data(csv_path):
+    df = pd.read_csv(csv_path)
+    df['Date'] = pd.to_datetime(df['Date'])
 
-numeric_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
-for col in numeric_cols:
-    df[col] = df[col].astype(str).str.replace(',', '').astype(float)
+    numeric_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+    for col in numeric_cols:
+        df[col] = df[col].astype(str).str.replace(',', '').astype(float)
 
-for col in numeric_cols:
-    df[f'{col}_1'] = df[col].shift(1)
-    df[f'{col}_2'] = df[col].shift(2)
+    for col in numeric_cols:
+        df[f'{col}_1'] = df[col].shift(1)
+        df[f'{col}_2'] = df[col].shift(2)
 
-df['Open_MA3'] = df['Open'].rolling(3).mean()
-df['Open_EMA5'] = df['Open'].ewm(span=5, adjust=False).mean()
-df['High_MA3'] = df['High'].rolling(3).mean()
-df['High_EMA5'] = df['High'].ewm(span=5, adjust=False).mean()
-df['Low_MA3'] = df['Low'].rolling(3).mean()
-df['Low_EMA5'] = df['Low'].ewm(span=5, adjust=False).mean()
-df['Close_MA3'] = df['Close'].rolling(3).mean()
-df['Close_EMA5'] = df['Close'].ewm(span=5, adjust=False).mean()
+    df['Open_MA3'] = df['Open'].rolling(3).mean()
+    df['Open_EMA5'] = df['Open'].ewm(span=5, adjust=False).mean()
+    df['High_MA3'] = df['High'].rolling(3).mean()
+    df['High_EMA5'] = df['High'].ewm(span=5, adjust=False).mean()
+    df['Low_MA3'] = df['Low'].rolling(3).mean()
+    df['Low_EMA5'] = df['Low'].ewm(span=5, adjust=False).mean()
+    df['Close_MA3'] = df['Close'].rolling(3).mean()
+    df['Close_EMA5'] = df['Close'].ewm(span=5, adjust=False).mean()
 
-df['High_Low_Range'] = df['High'] - df['Low']
-df['Open_Volatility3'] = df['Open'].rolling(3).std()
-df['High_Volatility3'] = df['High'].rolling(3).std()
-df['Low_Volatility3'] = df['Low'].rolling(3).std()
-df['Close_Volatility3'] = df['Close'].rolling(3).std()
-df['Volume_Volatility3'] = df['Volume'].rolling(3).std()
-df['Volume_MA3'] = df['Volume'].rolling(3).mean()
-df['Volume_MA5'] = df['Volume'].rolling(5).mean()
+    df['High_Low_Range'] = df['High'] - df['Low']
+    df['Open_Volatility3'] = df['Open'].rolling(3).std()
+    df['High_Volatility3'] = df['High'].rolling(3).std()
+    df['Low_Volatility3'] = df['Low'].rolling(3).std()
+    df['Close_Volatility3'] = df['Close'].rolling(3).std()
+    df['Volume_Volatility3'] = df['Volume'].rolling(3).std()
+    df['Volume_MA3'] = df['Volume'].rolling(3).mean()
+    df['Volume_MA5'] = df['Volume'].rolling(5).mean()
 
-df.dropna(inplace=True)
+    df.dropna(inplace=True)
+    return df
+
+@st.cache_data
+def train_models(df, feature_sets):
+    predictions = pd.DataFrame()
+    metrics = {}
+
+    for target, features in feature_sets.items():
+        X = df[features]
+        y = df[target]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+        
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+        
+        ridge = Ridge()
+        grid = GridSearchCV(ridge, {'alpha':[0.001,0.01,0.1,1,10]}, cv=5)
+        grid.fit(X_train_scaled, y_train)
+        
+        best_model = grid.best_estimator_
+        y_pred = best_model.predict(X_test_scaled)
+        
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        metrics[target] = {'Best_alpha': grid.best_params_, 'MSE': mse, 'R2': r2}
+        
+        predictions[f'Actual_{target}'] = y_test.values
+        predictions[f'Pred_{target}'] = y_pred
+
+    predictions['Date'] = df.iloc[-len(predictions):]['Date'].values
+    return predictions, metrics
+
+st.title('Google Stock: Actual vs Predicted Prices & Volume')
 
 feature_sets = {
     'Open': ['Open_1','Open_2','Close_1','Close_2','High_1','High_2','Low_1','Low_2',
@@ -44,44 +81,19 @@ feature_sets = {
     'High': ['High_1','High_2','Open_1','Open_2','Close_1','Low_1',
              'High_MA3','High_EMA5','High_Volatility3','High_Low_Range'],
     'Low': ['Low_1','Low_2','Open_1','Open_2','Close_1','High_1',
-            'Low_MA3','Low_EMA5','Low_Volatility3','High_Low_Range'],
+             'Low_MA3','Low_EMA5','Low_Volatility3','High_Low_Range'],
     'Close': ['Close_1','Close_2','Open_1','Open_2','High_1','Low_1',
-              'Close_MA3','Close_EMA5','Close_Volatility3','High_Low_Range'],
+             'Close_MA3','Close_EMA5','Close_Volatility3','High_Low_Range'],
     'Volume': ['Volume_1','Volume_2','Open_1','Close_1','High_1','Low_1',
                'Volume_MA3','Volume_MA5','Volume_Volatility3','High_Low_Range']
 }
 
-predictions = pd.DataFrame()
-metrics = {}
+df = load_and_prep_data("google.csv")
+predictions, metrics = train_models(df, feature_sets)
 
-for target, features in feature_sets.items():
-    X = df[features]
-    y = df[target]
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-    
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    ridge = Ridge()
-    grid = GridSearchCV(ridge, {'alpha':[0.001,0.01,0.1,1,10]}, cv=5)
-    grid.fit(X_train_scaled, y_train)
-    
-    best_model = grid.best_estimator_
-    y_pred = best_model.predict(X_test_scaled)
-    
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    metrics[target] = {'Best_alpha': grid.best_params_, 'MSE': mse, 'R2': r2}
-    
-    predictions[f'Actual_{target}'] = y_test.values
-    predictions[f'Pred_{target}'] = y_pred
-
-predictions['Date'] = df.iloc[-len(predictions):]['Date'].values
-
+st.subheader("Model Performance")
 for target, metric in metrics.items():
-    print(f"{target} -> Best alpha: {metric['Best_alpha']}, Test MSE: {metric['MSE']:.6f}, R2: {metric['R2']:.6f}")
+    st.write(f"**{target}** -> Best alpha: {metric['Best_alpha']}, Test MSE: {metric['MSE']:.6f}, R2: {metric['R2']:.6f}")
 
 fig = go.Figure()
 
@@ -96,12 +108,10 @@ for target in ['Open', 'High', 'Low', 'Close', 'Volume']:
     ))
 
 fig.update_layout(
-    title='Google Stock: Actual vs Predicted Prices & Volume',
     xaxis_title='Date',
     yaxis_title='Value',
     hovermode='x unified',
     template='plotly_white'
 )
 
-st.plotly_chart(fig)
-
+st.plotly_chart(fig, use_container_width=True)
