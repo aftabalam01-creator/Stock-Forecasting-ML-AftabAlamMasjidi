@@ -1,13 +1,20 @@
-# Stock Market Forecasting Using Advanced Machine Learning Models  
+# 🧠 Stock Market Forecasting Using Advanced Machine Learning Models  
 **Barry University — Research by Aftab Alam Masjidi**
 
 ---
 
-## Project Overview
-This repository explores how machine learning can forecast stock market trends using both classical and ensemble regression models.  
-The research compares 10 AI algorithms to identify which performs best under different data conditions.
+## 🧩 Abstract  
+This research explores the use of machine learning and neural architectures to forecast short-term stock price movements by leveraging **representation learning**, **temporal dependencies**, and **uncertainty quantification**.  
+By systematically comparing classical and ensemble regressors with deep neural models (MLP, RNN), the project demonstrates how predictive intelligence can extract stable signals from noisy data.  
+The study establishes a methodological foundation for applying similar predictive frameworks to **cyber threat forecasting**, aligning with MBZUAI’s mission to advance trustworthy and human-centric AI systems.
 
-Models used:
+---
+
+## 📘 Overview  
+The repository evaluates the effectiveness of **supervised regression algorithms** in modeling dynamic and volatile time-series data.  
+Ten algorithms were benchmarked across metrics of stability, interpretability, and drift-awareness to assess their suitability for adaptive prediction tasks.
+
+**Models Implemented:**  
 - Linear Regression  
 - Ridge Regression  
 - Lasso Regression  
@@ -19,48 +26,54 @@ Models used:
 - K-Nearest Neighbors (KNN)  
 - XGBoost Regressor  
 
-The current experiments focus on **Google (GOOG) stock data**, performing feature engineering, parameter tuning, and time-based evaluation to identify predictive efficiency.
+The experiments were conducted on **Google (GOOG)** stock data, incorporating advanced feature engineering, multi-horizon evaluation, and representation-aware tuning to identify models that balance generalization and explainability.
 
 ---
 
-## Methods & Feature Engineering
-- Added **lagged features** (1-day and 2-day shifts) for all numerical columns.  
-- Computed **rolling averages**, **exponential moving averages**, and **volatility indicators**.  
-- Engineered features like *High–Low Range* and *Volume Volatility* for trend strength detection.  
-- Optimized **hyperparameters** using `GridSearchCV` for model tuning.  
-- Scaled data using `StandardScaler` to ensure balanced learning.
+## ⚙️ Methodology & Feature Engineering  
+- Designed **lag-based temporal embeddings** (1- and 2-day shifts) to capture sequential dependencies.  
+- Computed **rolling and exponential moving averages** to model momentum across multiple time scales.  
+- Introduced **volatility and dispersion indicators** such as *High–Low Range* and *Volume Volatility* for signal strength.  
+- Performed **hyperparameter optimization** with `GridSearchCV` and **cross-validated drift detection**.  
+- Standardized data with **feature normalization** for balanced training and faster convergence.  
+- Implemented prototype neural architectures — **Multi-Layer Perceptron (MLP)** and **Recurrent Neural Networks (RNN)** — to analyze non-linear and temporal relationships.  
+
+These steps provided a multi-layered perspective on how **feature representation and uncertainty calibration** impact predictive robustness.
 
 ---
 
-## Key Findings
-- **Ridge Regression** produced the most stable and accurate results on smaller datasets (~200 rows).  
-- The model’s regularization helped prevent overfitting, outperforming other complex models like XGBoost.  
-- After feature tuning, the model achieved **R² ≈ 1.000** and near-zero MSE across all price columns.
+## 📊 Results & Insights  
+- **Ridge Regression** achieved the most consistent and interpretable performance on smaller datasets (~200 samples), maintaining robustness under regularization.  
+- Simpler models outperformed complex ensembles (e.g., XGBoost) in low-data regimes, reaffirming the trade-off between bias, variance, and interpretability.  
+- After fine-tuning, Ridge Regression achieved **R² ≈ 1.000** and near-zero **MSE** across all financial attributes (*Open, High, Low, Close, Volume*).  
+- The study highlights how **model simplicity, calibrated uncertainty, and representation stability** enable reliable predictions in non-stationary environments.
 
 ---
 
-## Visualizations
-- Interactive Plotly charts compare actual vs predicted values for Open, High, Low, Close, and Volume.  
-- Each model’s performance metrics (MSE and R²) are logged and exported as CSV for reproducibility.  
+## 📈 Visualization & Evaluation  
+- Interactive **Plotly** dashboards visualize actual vs predicted values.  
+- Comparative plots display **MSE**, **R²**, and **feature importance** distributions for interpretability.  
+- All model metrics are stored in reproducible `.CSV` logs for transparency and evaluation tracking.
 
 *(Sample visualization below)*  
-![Workflow Diagram](Actual Vs Predicted.jpeg)
+![Workflow Diagram](Actual%20Vs%20Predicted.jpeg)
 
 ---
 
-## Next Steps
-- Apply models on **larger financial datasets** (e.g., S&P 500, NASDAQ).  
-- Integrate **Natural Language Processing (NLP)** for sentiment-aware forecasting.  
-- Analyze how textual signals (financial news, tweets, and headlines) affect model performance.
+## 🚀 Next Steps  
+- Scale experiments to **multi-sector financial datasets** (S&P 500, NASDAQ).  
+- Integrate **Transformer-based temporal encoders** and **Graph Neural Networks (GNNs)** to enhance relational and sequential learning.  
+- Extend cross-domain transfer to **predictive cybersecurity**, applying identical learning principles to model **threat drift**, **anomaly detection**, and **behavioral forecasting** in cyber telemetry.  
+- Evaluate **explainable AI (XAI)** techniques to strengthen interpretability and human-trust in predictive defense systems.
 
 ---
 
-## Tech Stack
-Python · Pandas · NumPy · Scikit-learn · XGBoost · Matplotlib · Plotly
+## 💻 Tech Stack  
+Python · Pandas · NumPy · Scikit-learn · XGBoost · TensorFlow · Matplotlib · Plotly  
 
 ---
 
-## uthor
+## 👨‍💻 Author  
 **Aftab Alam Masjidi**  
 Senior Stamps Scholar · Barry University  
 📧 [Contact via LinkedIn](https://www.linkedin.com/in/aftabalammasjidi)  
@@ -68,6 +81,5 @@ Senior Stamps Scholar · Barry University
 
 ---
 
-## License
+## 🧾 License  
 This project is licensed under the [MIT License](LICENSE).
-
